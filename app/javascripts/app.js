@@ -7,12 +7,14 @@ import wisp_template from '../../build/contracts/Wisp.json'
 var WispNetworkToken = contract(wnt_template);
 var Wisp = contract(wisp_template);
 window.Wisp = Wisp;
-var _Wisp;
+
 var accounts;
 var account;
 var watcher; 
 
 window.App = {
+  currentWisp: null,
+  wisps: [],
   start: function() {
     var self = this;
 
@@ -57,6 +59,7 @@ window.App = {
   },
 
   watchLogs: function() {
+    var self = this;
     console.log('logging...')
     WispNetworkToken.deployed().then(function(instance) {
       watcher = instance.allEvents();
@@ -64,9 +67,13 @@ window.App = {
       watcher.watch(function(err, evt) {
         //console.log('watcher fired');
         if (!err)
+        var evtName = evt.event;
+        var logs = evt.args;
           console.log(evt.event);
-          console.log(evt)
-          
+          console.log(evt.args)
+          if (evtName === "CreateWisp") {
+            self.setWisp(evt.args.wispAddr);
+          }
       });
     });
   },
@@ -109,7 +116,16 @@ window.App = {
   },
 
   setWisp: function(_addr) {
-    _Wisp = _addr;
+    var self = this;    
+    self.currentWisp = self.wispFactory(_addr);
+    console.log(self.currentWisp);
+    self.wisps.push(self.currentWisp);
+    window.wisp = self.currentWisp;
+    self.refreshWisps();
+  },
+
+  refreshWisps: function() {
+    
   },
 
   follow: function(_addr) {
