@@ -1,28 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TemplateCoin</title>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-  <script src="./app.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script
+src="https://code.jquery.com/jquery-3.2.1.min.js"
+integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+crossorigin="anonymous"></script>
+  <script src="./app.js"></script> 
 </head>
 <body>
+<nav class="navbar navbar-default navbar-fixed-top">
+<div class="container">
+  <div class="row">
+    <div class="col-xs-10">
+      <form>       
+        <select class="form-control" id="WispSelect">
+          <option>No Wisps</option>
+        </select>
+      </form>
+    </div>
+    <div class="col-xs-2 balance">
+      
+    </div>      
+  </div>
+</div>
+</nav>
+  
+<div class="container">
+  <div class="row">
+    <h1>Wisp Network Token</h1>    
+    <span>Contract Address: <span class="contract-address"></span></span>
+    <span id="status"></span>
+    <select class="form-control accounts">
+      <option>No Accounts</option>
+    </select>
+    <form>
+      <div class="form-group">   
+        <input type="number" class="form-control wisp-weight" value=100>
+        <button type="button" class="btn btn-info" onclick="App.createWisp()">Create Wisp</button>    
+        <button type="button" class="btn btn-info" onclick="App.findWisps()">Find Wisps</button>    
+        <button type="button" class="btn btn-info" onclick="App.refreshWisps()">Refresh Wisps</button>    
+      </div>
+    </form>
+  </div>
+  <div class="row">
+    <h1>Current Wisp</h1>
+    <p>Address<span class="address"></span></p>
+    <p>Weight<span class="weight"></span></p>
+    <p>Creator<span class="creator"></span></p>
+    <p>Owner<span class="owner"></span></p>
+    <p>New Owner<span class="newOwner"></span></p>
+  </div>
+</div>
 
-  <h1>Wisp Network Token</h1>
-  <br>
-  <select id="WispSelect">
-    <option>No Wisps</option>
-  </select>
-  <br>
-  <br>
-
-  <h1>Send WNT</h1>
-  <h4>You have <span class="black"><span id="balance"></span> WNT</span></h4>
-  <br><label for="amount">Amount:</label><input type="text" id="amount" placeholder="e.g., 95"></input>
-  <br><label for="receiver">To Address:</label><input type="text" id="receiver" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"></input>
-  <br><br><button id="send" onclick="App.sendCoin()">Send WNT</button>
-  <br><br><button id="send" onclick="App.createWisp()">Create Wisp</button>
-  <br><br>
-  <span id="status"></span>
-  <br>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </body>
 </html>

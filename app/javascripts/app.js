@@ -7,19 +7,20 @@ import wisp_template from '../../build/contracts/Wisp.json'
 var WispNetworkToken = contract(wnt_template);
 var Wisp = contract(wisp_template);
 window.Wisp = Wisp;
-
-var accounts;
-var account;
 var watcher; 
 
 window.App = {
+  accounts: [],
+  account: null,
   currentWisp: null,
   wisps: [],
+  filter: null,
   start: function() {
     var self = this;
 
     WispNetworkToken.setProvider(web3.currentProvider);
     Wisp.setProvider(web3.currentProvider);
+
 
     web3.eth.getAccounts(function(err, accs) {
       if (err != null) {
@@ -32,12 +33,34 @@ window.App = {
         return;
       }
 
-      accounts = accs;
-      account = accounts[0];
-
+      self.accounts = accs;
+      self.account = self.accounts[0];
+      console.log(self.accounts)
+      self.refreshAccounts();
       self.refreshBalance();
       self.watchLogs();
     });
+    self.getContractAddress();
+  },
+
+  refreshAccounts: function() {    
+    var self = this;
+    $('.accounts').empty();     
+    if (self.accounts && self.accounts.length > 0) {
+      self.accounts.forEach(function(account) {
+        $('.accounts').append('<option>' + account + '</option>');
+      })
+    }
+  },
+
+  getContractAddress: function() {
+    var self = this;
+    var wnt;
+
+    WispNetworkToken.deployed().then(function(instance) {
+      wnt = instance;
+      $('.contract-address').text(wnt.address);
+    })  
   },
 
   setStatus: function(message) {
@@ -51,7 +74,8 @@ window.App = {
 
     WispNetworkToken.deployed().then(function(instance) {
       wnt = instance;
-      return wnt.createWisp(1, false, {from: account, gas:10000000});
+      var _weight = $('.wisp-weight').val();
+      return wnt.createWisp(_weight, false, {from: self.account, gas:10000000});
     }).then(function(receipt, _address) {
       console.log(receipt);
       console.log(_address);
@@ -69,13 +93,16 @@ window.App = {
         if (!err)
         var evtName = evt.event;
         var logs = evt.args;
-          console.log(evt.event);
-          console.log(evt.args)
+
           if (evtName === "CreateWisp") {
             self.setWisp(evt.args.wispAddr);
           }
       });
     });
+  },
+
+  stopWatcher: function() {
+    watcher = null;
   },
 
   refreshBalance: function() {
@@ -84,10 +111,9 @@ window.App = {
 
     WispNetworkToken.deployed().then(function(instance) {
       wnt = instance;
-      return wnt.getBalance.call(account, {from: account});
+      return wnt.getBalance.call(self.account, {from: self.account});
     }).then(function(value) {
-      var balance_element = document.getElementById("balance");
-      balance_element.innerHTML = value.valueOf();
+      $('.balance').text(value.valueOf() / 1000000);
     }).catch(function(e) {
       console.log(e);
       self.setStatus("Error getting balance; see log.");
@@ -105,7 +131,7 @@ window.App = {
     var wnt;
     WispNetworkToken.deployed().then(function(instance) {
       wnt = instance;
-      return wnt.transfer(receiver, amount, {from: account});
+      return wnt.transfer(receiver, amount, {from: self.account});
     }).then(function() {
       self.setStatus("Transaction complete!");
       self.refreshBalance();
@@ -118,22 +144,68 @@ window.App = {
   setWisp: function(_addr) {
     var self = this;    
     self.currentWisp = self.wispFactory(_addr);
-    console.log(self.currentWisp);
     self.wisps.push(self.currentWisp);
     window.wisp = self.currentWisp;
     self.refreshWisps();
+    self.refreshBalance();
+    self.getWispData(self.currentWisp)
   },
 
   refreshWisps: function() {
-    
+    var self = this;
+    var selector = $('#WispSelect');
+    selector.empty();
+    self.wisps.forEach(function(wisp)  {      
+      selector.append('<option value="' + wisp.address + '">' + wisp.address + '</option>')
+    });    
+  },
+
+  findWisps: function() {
+    var self = this;
+    var contractAddress = $('.contract-address').text();
+    self.wisps = [];
+
+    var _owner = $('.accounts').val();
+
+    console.log('looking for owner ' + _owner);
+
+    WispNetworkToken.deployed().then(function(instance) {
+      var event = instance.CreateWisp({}, {
+        fromBlock:0, 
+        toBlock: 'latest', 
+        address: contractAddress, 
+      },
+      function(err, log) {                
+        console.log(err)
+        console.log(log)
+        console.log(log.args.owner)
+        console.log(_owner)
+        var _addr = log.args.wispAddr;
+        if (log.args.owner === _owner) {
+          console.log('owner found')
+          self.wisps.push(self.wispFactory(_addr));        
+        }
+        self.refreshWisps();
+      });      
+    })
+
+  },
+
+  getWispData: function(wisp) {
+    console.log(Object.keys(wisp));
+    $('.address').text(wisp.address);
+    $('.weight').text(wisp.weight());
+    $('.creator').text(wisp.creator());
+    $('.owner').text(wisp.owner());
+    $('.newOwner').text(wisp.newOwner());
   },
 
   follow: function(_addr) {
-    Wisp.at(_Wisp).follow(_Wisp, {from: account, gas: 1000000});
+    Wisp.at(_Wisp).follow(_Wisp, {from: self.account, gas: 1000000});
   },
 
   unfollow: function(_addr) {
-    Wisp.at(_Wisp).unfollow(_addr, {from: account, gas: 1000000});
+    Wisp.at(_Wisp).unfollow(_addr, {from: self.account, gas: 1000000});
   },
 
   isFollowing: function(_addr) {
@@ -142,7 +214,7 @@ window.App = {
     var wisp;
     Wisp.at(_Wisp).then(function(instance) {
       wisp = instance;      
-      return wisp.isFollowing(_addr, {from: account, gas: 1000000});
+      return wisp.isFollowing(_addr, {from: self.account, gas: 1000000});
     }).then(function(data) {
       console.log(data)
       console.log('Following Check Finished');
@@ -161,6 +233,26 @@ window.App = {
       console.log(data)
       self.setStatus('Wisp Following Retrieved');
     })
+  },
+
+  setEvents: function() {
+    var self = this;
+    $('#WispSelect').change(function(e) {
+      var el = this;
+      var addr = el.value;
+      self.wisps.forEach(function(wisp) {
+        if (wisp.address === addr) {
+          self.getWispData(wisp);
+        }
+      })
+    });
+
+    $('.accounts').change(function(e) {
+      self.account = this.value;
+      console.log(self.account);
+      self.refreshBalance();
+      self.findWisps();
+    });
   },
 
   wispFactory: function(_addr) {
@@ -182,5 +274,8 @@ window.addEventListener('load', function() {
     window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
   }
 
-  App.start();
+  App.start();  
+  App.setEvents();
+  App.findWisps();  
 });
+

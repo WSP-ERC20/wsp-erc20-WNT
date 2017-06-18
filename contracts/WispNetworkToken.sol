@@ -7,17 +7,19 @@ contract WispNetworkToken is StandardToken {
 	string public name;
 	uint8 public decimals;
 	string public symbol;	
+	uint24 public maxWeight;	
 
 	function () {
 		throw;
 	}
 
 	function WispNetworkToken() {
-		 balances[msg.sender] = 1000000; 	// 1M Dev coins
-		 totalSupply 					= 10000000;	// 9M Market coins
-		 name 								= 'Wisp Network Token';				
-		 decimals 						= 18;
-		 symbol 							= 'WNT';
+		decimals 							= 6;
+		totalSupply 					= 100000000000000;	// 100M Market coins
+		balances[msg.sender] 	= 10000000000000; 	// 10M Dev coins
+		name 									= 'Wisp Network Token';						
+		symbol 								= 'WNT';
+		maxWeight							= 1000000;
 	 }
 
   function approveAndCall(address _spender, uint256 _value, bytes _extraData) returns (bool success) {
@@ -28,16 +30,16 @@ contract WispNetworkToken is StandardToken {
     return true;
   }
 
-	function createWisp(uint _weight, bool _positive) returns (address) {
-		balances[msg.sender] -= _weight ;
-    Wisp newWisp = new Wisp(msg.sender);
-		CreateWisp(msg.sender, address(this), address(newWisp));	
-    //isWisp[address(newWisp)] = true;
-    //CreateWisp(msg.sender, address(this), address(newWisp));
-    //HumanStandardToken newToken = (new HumanStandardToken(_initialAmount, _name, _decimals, _symbol));
-    //created[msg.sender].push(address(newToken));
-    //isHumanToken[address(newToken)] = true;
-    //newToken.transfer(msg.sender, _initialAmount); //the factory will own the created tokens. You must transfer them.
+	// Negative values will cause _weight to count from uint24 max backwards
+  // Cannot prevent them being sent but can check their values
+	function createWisp(uint24 _weight, bool _positive) returns (address) {
+		if (balances[msg.sender] > _weight && _weight > 0 && _weight <= maxWeight) {
+			balances[msg.sender] -= _weight;
+			Wisp newWisp = new Wisp(msg.sender, _weight);
+			CreateWisp(msg.sender, address(this), address(newWisp), _weight);	
+		} else {
+			throw;
+		}
     return address(newWisp);
   }
 
@@ -45,6 +47,6 @@ contract WispNetworkToken is StandardToken {
 		return balances[addr];
 	}
 	
-	event CreateWisp(address owner, address creator, address wispAddr);
+	event CreateWisp(address owner, address creator, address wispAddr, uint24 weight);
 
 }

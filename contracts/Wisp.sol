@@ -24,10 +24,10 @@ contract Wisp {
 		_;
 	}
 
-	function Wisp(address _owner) {
+	function Wisp(address _owner, uint24 _weight) {
 		owner = _owner;
 		creator = msg.sender;
-		weight = 100;//_weight > maxWeight ? maxWeight : weight;
+		weight = _weight;
 		positive = true;//_positive;
 	}
 
@@ -53,7 +53,7 @@ contract Wisp {
 	function getAddresses(uint _start, uint _end) constant returns (bytes32[]) {
 		return wispStorage;
 	}	
-
+/*
 	function getWispData() constant returns (address, uint, bool, address, address, address)  {
 		return (
 			address(this),
@@ -63,7 +63,7 @@ contract Wisp {
 			creator,
 			newOwner);
 	}
-
+*/
 	mapping (address => bool) following;
 
 }
