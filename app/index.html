@@ -9,40 +9,40 @@
 src="https://code.jquery.com/jquery-3.2.1.min.js"
 integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
 crossorigin="anonymous"></script>
-  <script src="./app.js"></script> 
+  <script src="./app.js"></script>
 </head>
 <body>
 <nav class="navbar navbar-default navbar-fixed-top">
 <div class="container">
   <div class="row">
     <div class="col-xs-10">
-      <form>       
-        <select class="form-control" id="WispSelect">
-          <option>No Wisps</option>
+      <form>
+        <select class="form-control accounts">
+          <option>No Accounts</option>
         </select>
       </form>
     </div>
     <div class="col-xs-2 balance">
-      
-    </div>      
+
+    </div>
   </div>
 </div>
 </nav>
-  
+
 <div class="container">
   <div class="row">
-    <h1>Wisp Network Token</h1>    
+    <h1>Wisp Network Token</h1>
     <span>Contract Address: <span class="contract-address"></span></span>
     <span id="status"></span>
-    <select class="form-control accounts">
-      <option>No Accounts</option>
-    </select>
+      <select class="form-control" id="WispSelect">
+        <option>No Wisps</option>
+      </select>
     <form>
-      <div class="form-group">   
+      <div class="form-group">
         <input type="number" class="form-control wisp-weight" value=100>
-        <button type="button" class="btn btn-info" onclick="App.createWisp()">Create Wisp</button>    
-        <button type="button" class="btn btn-info" onclick="App.findWisps()">Find Wisps</button>    
-        <button type="button" class="btn btn-info" onclick="App.refreshWisps()">Refresh Wisps</button>    
+        <button type="button" class="btn btn-info" onclick="App.createWisp()">Create Wisp</button>
+        <button type="button" class="btn btn-info" onclick="App.findWisps()">Find Wisps</button>
+        <button type="button" class="btn btn-info" onclick="App.refreshWisps()">Refresh Wisps</button>
       </div>
     </form>
   </div>
@@ -53,6 +53,18 @@ crossorigin="anonymous"></script>
     <p>Creator<span class="creator"></span></p>
     <p>Owner<span class="owner"></span></p>
     <p>New Owner<span class="newOwner"></span></p>
+    <p>Peek<span class="peek"></span></p>
+    <p>Bottom<span class="bottom"></span></p>
+  </div>
+  <div class="form-group">
+    <input type="text" class="form-control wisp-add-data" value="Some Data"></input>
+    <button type="button" class="btn btn-info" onclick="App.addToStorage()">Add Data</button>
+    <button type="button" class="btn btn-info" onclick="App.getData()">Get Data</button>
+    <button type="button" class="btn btn-info" onclick="App.peek()">Peek</button>
+    <input type="text" class="form-control wisp-follow-data" value="0x0123"></input>
+    <button type="button" class="btn btn-info" onclick="App.follow()">Follow</button>
+    <button type="button" class="btn btn-info" onclick="App.unfollow()">Unfollow</button>
+    <button type="button" class="btn btn-info" onclick="alert(App.isFollowing())">isFollowing</button>
   </div>
 </div>
 
