@@ -32,7 +32,7 @@ contract Wisp {
 	}
 
 	function follow(address _addr) onlyBy(owner) {
-		if (!isFollowed(_addr)) {
+		if (!hasFollowed(_addr)) {
 			addresses.push(_addr);
 			followed[_addr] = true;
 		}
@@ -47,7 +47,7 @@ contract Wisp {
 		return following[_addr];
 	}
 
-	function isFollowed(address _addr) constant returns (bool) {
+	function hasFollowed(address _addr) constant returns (bool) {
 		return followed[_addr];
 	}
 
@@ -55,5 +55,14 @@ contract Wisp {
 		wispStorage.push(_data);
 	}
 
-	mapping (address => bool) following;
+	function changeOwner(address _addr) onlyBy(owner) {
+		newOwner = _addr;
+	}
+
+	function acceptOwnership() onlyBy(newOwner) {
+		owner = newOwner;
+	}
+
+	mapping (address => bool) followed;			// History of followed addresses
+	mapping (address => bool) following;		// Current state of following
 }

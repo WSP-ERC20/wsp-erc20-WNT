@@ -16,7 +16,7 @@ contract WispNetworkToken is StandardToken {
 	function WispNetworkToken() {
 		decimals 							= 6;
 		totalSupply 					= 100000000000000;	// 100M Market coins
-		balances[msg.sender] 	= 10000000000000; 	// 10M Dev coins
+		balances[msg.sender] 	= 20000000000000; 	// 10M Dev coins
 		name 									= 'Wisp Network Token';
 		symbol 								= 'WNT';
 		maxWeight							= 1000000;
