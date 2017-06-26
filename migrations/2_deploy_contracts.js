@@ -1,7 +1,7 @@
 var WispNetworkToken = artifacts.require("./WispNetworkToken.sol");
-//var WispAsset = artifacts.require("./WispAsset.sol");
+var GoldWispGenerator = artifacts.require("./GoldWispGenerator.sol");
 
 module.exports = function(deployer) {
   deployer.deploy(WispNetworkToken);
-//  deployer.deploy(WispAsset);
+  deployer.deploy(GoldWispGenerator);
 };

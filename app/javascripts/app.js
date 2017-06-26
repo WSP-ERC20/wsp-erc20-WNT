@@ -4,10 +4,17 @@ import { default as contract } from 'truffle-contract'
 
 import wnt_template from '../../build/contracts/WispNetworkToken.json'
 import wisp_template from '../../build/contracts/Wisp.json'
+import gold_wisp_template from '../../build/contracts/GoldWisp.json'
+import gw_template from '../../build/contracts/GoldWispGenerator.json'
 
 var WispNetworkToken = contract(wnt_template);
 var Wisp = contract(wisp_template);
+var GoldWisp = contract(gold_wisp_template);
+var GoldWispGenerator = contract(gw_template);
+
 window.Wisp = Wisp;
+window.GoldWisp = GoldWisp;
+window.GWT = GoldWispGenerator;
 var watcher;
 
 window.App = {
@@ -21,6 +28,7 @@ window.App = {
 
     WispNetworkToken.setProvider(web3.currentProvider);
     Wisp.setProvider(web3.currentProvider);
+    GoldWispGenerator.setProvider(web3.currentProvider);
 
 
     web3.eth.getAccounts(function(err, accs) {
@@ -41,6 +49,17 @@ window.App = {
       self.watchLogs();
     });
     self.getContractAddress();
+    self.getGoldGenAddress();
+  },
+
+  createGoldWisp: function() {
+    var self = this;
+    GoldWispGenerator.deployed().then(function(instance) {
+      return instance.createGoldWisp({from: self.account, gas: 1000000})
+    }).then(function(receipt, goldwisp) {
+      console.log(receipt);
+      console.log(goldwisp);
+    })
   },
 
   refreshAccounts: function() {
@@ -61,6 +80,17 @@ window.App = {
       wnt = instance;
       $('.contract-address').text(wnt.address);
     })
+  },
+
+  getGoldGenAddress: function() {
+    var self = this;
+    var gen;
+
+    GoldWispGenerator.deployed().then(function(instance) {
+      gen = instance;
+      console.log(gen);
+      $('.gen-address').text(gen.address);
+    });
   },
 
   setStatus: function(message) {
@@ -99,6 +129,24 @@ window.App = {
           }
       });
     });
+
+    GoldWispGenerator.deployed().then(function(instance) {
+      watcher = instance.allEvents();
+      console.log('Gold watcher started');
+      watcher.watch(function(err, evt) {
+
+        console.log(evt)
+
+        if (!err)
+        var evtName = evt.event;
+        var logs = evt.args;
+
+        if (evtName === "CreateGoldWisp") {
+          self.setGoldWisp(evt.args.goldWispAddr);
+        }
+      })
+    })
+
   },
 
   stopWatcher: function() {
@@ -149,6 +197,12 @@ window.App = {
     self.refreshWisps();
     self.refreshBalance();
     self.getWispData(self.currentWisp)
+  },
+
+  setGoldWisp: function(_addr) {
+    var self = this;
+    self.goldWisp = self.goldWispFactory(_addr);
+    window.goldWisp = self.goldWisp;
   },
 
   refreshWisps: function() {
@@ -257,6 +311,12 @@ window.App = {
 
   wispFactory: function(_addr) {
     var contract = web3.eth.contract(wisp_template.abi);
+    var instance = contract.at(_addr);
+    return instance;
+  },
+
+  goldWispFactory: function(_addr) {
+    var contract = web3.eth.contract(gold_wisp_template.abi);
     var instance = contract.at(_addr);
     return instance;
   },
